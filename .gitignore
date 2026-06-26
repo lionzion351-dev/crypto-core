@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+
+# Pre-existing app-repo stub (PBKDF2 600k); superseded by src/ — excluded from this package
+/index.ts

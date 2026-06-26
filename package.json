@@ -1,0 +1,35 @@
+{
+  "name": "@vaultpass/crypto-core",
+  "version": "0.1.0",
+  "description": "VaultPass zero-knowledge cryptographic core — AES-256-GCM, SHA-256, and Shamir's Secret Sharing (GF(256)). Browser-native Web Crypto, zero runtime dependencies.",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test __tests__/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "encryption",
+    "aes-256-gcm",
+    "shamir-secret-sharing",
+    "zero-knowledge",
+    "web-crypto",
+    "cryptography"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {}
+}
