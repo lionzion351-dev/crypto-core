@@ -61,6 +61,8 @@ function sssSplit(secret: Uint8Array, shares: number, threshold: number): Share[
 
 function sssCombine(shares: Share[], threshold = 2): Uint8Array {
   if (shares.length < threshold) throw new Error(`Need at least ${threshold} shares`);
+  const xs = shares.map((s) => s.x);
+  if (new Set(xs).size !== xs.length) throw new Error("Duplicate share x-values");
   const len = shares[0].y.length;
   const secret = new Uint8Array(len);
   for (let bi = 0; bi < len; bi++) {
