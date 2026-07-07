@@ -16,6 +16,7 @@ export function bytesToBase64(bytes: Uint8Array): string {
 }
 
 export function base64ToBytes(b64: string): Uint8Array {
+  if (/\s/.test(b64)) throw new Error("base64 input must not contain whitespace");
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);

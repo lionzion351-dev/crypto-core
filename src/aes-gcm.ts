@@ -52,6 +52,9 @@ export async function decryptSeedPhrase(encryptedBlob: string, keyB64: string): 
   const [ivB64, ciphertextB64] = parts;
 
   const iv = base64ToBytes(ivB64);
+  if (iv.length !== 12) {
+    throw new Error(`Invalid IV: expected 12 bytes, got ${iv.length}`);
+  }
   const ciphertext = base64ToBytes(ciphertextB64);
   const rawKey = base64ToBytes(keyB64);
 
@@ -65,5 +68,5 @@ export async function decryptSeedPhrase(encryptedBlob: string, keyB64: string): 
 
   const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
 
-  return new TextDecoder().decode(decrypted);
+  return new TextDecoder("utf-8", { fatal: true }).decode(decrypted);
 }

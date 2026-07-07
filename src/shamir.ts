@@ -45,6 +45,9 @@ interface Share {
 }
 
 function sssSplit(secret: Uint8Array, shares: number, threshold: number): Share[] {
+  if (!Number.isInteger(threshold) || threshold < 2) throw new Error("threshold must be an integer >= 2");
+  if (!Number.isInteger(shares) || shares < threshold) throw new Error("shares must be an integer >= threshold");
+  if (secret.length === 0) throw new Error("secret must be non-empty");
   const result: Share[] = Array.from({ length: shares }, (_, i) => ({
     x: i + 1,
     y: new Uint8Array(secret.length),
@@ -64,6 +67,9 @@ function sssCombine(shares: Share[], threshold = 2): Uint8Array {
   const xs = shares.map((s) => s.x);
   if (new Set(xs).size !== xs.length) throw new Error("Duplicate share x-values");
   const len = shares[0].y.length;
+  for (let i = 1; i < shares.length; i++) {
+    if (shares[i].y.length !== len) throw new Error("Share length mismatch");
+  }
   const secret = new Uint8Array(len);
   for (let bi = 0; bi < len; bi++) {
     let value = 0;
@@ -90,9 +96,12 @@ function ser(s: Share): string {
 function deser(raw: string): Share {
   const parts = raw.split(":");
   if (parts.length !== 2) throw new Error("Invalid shard format");
-  const x = parseInt(parts[0], 10);
+  if (!/^\d+$/.test(parts[0])) throw new Error("Invalid shard index");
+  const x = Number(parts[0]);
   if (!Number.isInteger(x) || x < 1 || x > 255) throw new Error("Invalid shard index");
-  return { x, y: base64ToBytes(parts[1]) };
+  const y = base64ToBytes(parts[1]);
+  if (y.length === 0) throw new Error("Shard payload must not be empty");
+  return { x, y };
 }
 
 /** Split a base64 key into a 2-of-3 set of serialized shards. */
@@ -104,8 +113,9 @@ export function splitKey(keyB64: string): [string, string, string] {
 
 /** Reconstruct the base64 key from any 2+ serialized shards. */
 export function reconstructKey(shards: string[]): string {
-  if (!Array.isArray(shards) || shards.length < 2) throw new Error("Need at least 2 shards");
+  const THRESHOLD = 2;
+  if (!Array.isArray(shards) || shards.length < THRESHOLD) throw new Error(`Need at least ${THRESHOLD} shards`);
   const shares = shards.map(deser);
-  const keyBytes = sssCombine(shares);
+  const keyBytes = sssCombine(shares, THRESHOLD);
   return bytesToBase64(keyBytes);
 }

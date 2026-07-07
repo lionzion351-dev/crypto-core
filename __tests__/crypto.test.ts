@@ -50,3 +50,42 @@ test("Shamir: a single shard reveals nothing and cannot reconstruct", () => {
 test("Shamir: malformed shard input is rejected", () => {
   assert.throws(() => reconstructKey(["not-a-shard", "also-bad"]));
 });
+
+test("Shamir: empty shard payload is rejected (SSS-06)", () => {
+  const [, s2] = splitKey("YW5vdGhlci1zZWNyZXQta2V5LXZhbHVl");
+  assert.throws(() => reconstructKey(["1:", s2]), /empty/);
+});
+
+test("Shamir: mismatched shard lengths are rejected (SSS-02)", () => {
+  const [s1] = splitKey("c29tZS0yNTYtYml0LWtleS1tYXRlcmlhbC1iYXNlNjQ=");
+  assert.throws(() => reconstructKey([s1, "2:AAAA"]), /length mismatch/);
+});
+
+test("Shamir: non-numeric shard index is rejected (SSS-03)", () => {
+  const [, s2] = splitKey("YW5vdGhlci1zZWNyZXQta2V5LXZhbHVl");
+  assert.throws(() => reconstructKey(["1abc:AAAA", s2]), /Invalid shard index/);
+});
+
+test("Shamir: empty shard array is rejected", () => {
+  assert.throws(() => reconstructKey([]), /at least 2 shards/);
+});
+
+test("Shamir: whitespace in shard base64 is rejected (SSS-09)", () => {
+  const [s1, s2] = splitKey("YW5vdGhlci1zZWNyZXQta2V5LXZhbHVl");
+  const [x, b64] = s2.split(":");
+  const mutated = `${x}:${b64.slice(0, 2)} ${b64.slice(2)}`;
+  assert.throws(() => reconstructKey([s1, mutated]), /whitespace/);
+});
+
+test("AES-GCM: wrong-length IV blob is rejected (AES-01)", async () => {
+  const { encryptedBlob, key } = await encryptSeedPhrase("hello");
+  const ct = encryptedBlob.split(".")[1];
+  await assert.rejects(() => decryptSeedPhrase(`AAAA.${ct}`, key), /Invalid IV/);
+});
+
+test("SHA-256 of empty string matches the known vector", async () => {
+  assert.equal(
+    await sha256(""),
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  );
+});
