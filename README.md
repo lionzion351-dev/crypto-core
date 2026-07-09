@@ -59,9 +59,18 @@ Or paste the primitives into any browser DevTools console — `crypto.subtle` is
 
 ## Scope & status
 
-This is the cryptographic core only — not the full VaultPass application. An independent
-third-party audit of VaultPass is scheduled for H2 2026; its report will be published on
-completion. Until then, this code is provided for transparency and independent review.
+This repository is VaultPass's **complete client-side cryptographic path** — envelope
+encryption (`encryptSeedPhrase`/`decryptSeedPhrase`, AES-256-GCM), 2-of-3 Shamir secret
+sharing (`splitKey`/`reconstructKey`), SHA-256, and base64. This is the code that makes
+VaultPass zero-knowledge: plaintext and full keys never reach a server.
+
+Not included: the Web Worker wrapper that runs this code off the main thread, and
+server-side glue (e.g. re-encrypting already-encrypted shards at rest). Neither introduces
+new cryptography or affects the zero-knowledge property.
+
+An independent third-party audit is planned — scope finalised, not yet scheduled; its
+report will be published on completion. Until then, this code is provided for transparency
+and independent review.
 
 ## License
 
